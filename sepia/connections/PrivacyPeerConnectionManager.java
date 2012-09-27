@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
+import java.net.Socket;
 
 import services.Utils;
 
@@ -132,13 +133,13 @@ public class PrivacyPeerConnectionManager extends ConnectionManager implements O
 	public void update(Observable obs, Object obj) {
 		if (obj instanceof Socket) {
 			// We got a new incoming connection
-			SSLSocket socket = (SSLSocket) obj;
+			Socket socket = (Socket)obj;
 
 			// Read the ID of our new friend.
 			try {
 				// printSSLSocketInfo(socket);
 				// socket.startHandshake();
-				checkCertificate(socket);
+				//checkCertificate(socket);
 				String id = (String) receiveMessage(socket);
 				addTemporaryConnection(id, socket);
 				sendMessage(socket, myId);

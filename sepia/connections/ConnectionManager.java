@@ -50,6 +50,8 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import javax.net.SocketFactory;
+
 import services.Services;
 import services.Utils;
 
@@ -92,8 +94,8 @@ public abstract class ConnectionManager {
 
 	protected String myId;
 	protected List<PrivacyPeerAddress> privacyPeerAddresses;
-	protected HashMap<String, SSLSocket> activeConnectionPool;
-	protected HashMap<String, SSLSocket> temporaryConnectionPool;
+	protected HashMap<String, Socket> activeConnectionPool;
+	protected HashMap<String, Socket> temporaryConnectionPool;
 	protected boolean useCompression = false;
 	protected int minInputPeers = 0;
 	protected int minPrivacyPeers = 3;
@@ -144,8 +146,8 @@ public abstract class ConnectionManager {
 	public ConnectionManager(String myId, List<PrivacyPeerAddress> privacyPeerAddresses, SSLContext sslContext) {
 		this.myId = myId;
 		this.privacyPeerAddresses = privacyPeerAddresses;
-		activeConnectionPool = new HashMap<String, SSLSocket>();
-		temporaryConnectionPool = new HashMap<String, SSLSocket>();
+		activeConnectionPool = new HashMap<String, Socket>();
+		temporaryConnectionPool = new HashMap<String, Socket>();
 		this.sslContext = sslContext;
 
 		// Create a local list of all the privacy peer IDs for easy matching.
@@ -410,7 +412,7 @@ public abstract class ConnectionManager {
 	 * @param socket the socket
 	 * @throws PrivacyViolationException 
 	 */
-	protected synchronized void addTemporaryConnection(String hostId, SSLSocket socket) {
+	protected synchronized void addTemporaryConnection(String hostId, Socket socket) {
 		temporaryConnectionPool.put(hostId, socket);
 	}
 
@@ -429,7 +431,7 @@ public abstract class ConnectionManager {
 	 * 
 	 * @return the active connection pool.
 	 */
-	public HashMap<String, SSLSocket> getActiveConnectionPool() {
+	public HashMap<String, Socket> getActiveConnectionPool() {
 		return activeConnectionPool;
 	}
 
@@ -438,7 +440,7 @@ public abstract class ConnectionManager {
 	 * 
 	 * @return the temporary connection pool.
 	 */
-	public HashMap<String, SSLSocket> getTemporaryConnectionPool() {
+	public HashMap<String, Socket> getTemporaryConnectionPool() {
 		return temporaryConnectionPool;
 	}
 
@@ -548,18 +550,10 @@ public abstract class ConnectionManager {
 	 * @throws IOException
 	 * @throws NoSuchAlgorithmException
 	 */
-	protected SSLSocket createSSLSocket(String host, int serverPort) throws UnknownHostException, IOException,
+	protected Socket createSSLSocket(String host, int serverPort) throws UnknownHostException, IOException,
 			NoSuchAlgorithmException {
-		SSLSocketFactory socketFactory = sslContext.getSocketFactory();
-		SSLSocket socket = (SSLSocket) socketFactory.createSocket(InetAddress.getByName(host), serverPort);
-		socket.setEnabledCipherSuites(socket.getSupportedCipherSuites());
-		socket.setNeedClientAuth(true);
-		socket.addHandshakeCompletedListener(new HandshakeCompletedListener() {
-			public void handshakeCompleted(HandshakeCompletedEvent event) {
-				logger.info("SSL handshake is completed. Chosen ciphersuite: " + event.getCipherSuite());
-			}
-		});
-		checkCertificate(socket);
+		SocketFactory socketFactory = SocketFactory.getDefault();
+		Socket socket =  socketFactory.createSocket(InetAddress.getByName(host), serverPort);
 		return socket;
 	}
 
@@ -628,7 +622,7 @@ public abstract class ConnectionManager {
 	 */
 	protected void connectToPrivacyPeer(PrivacyPeerAddress ppa) {
 		// Do we already have an active connection?
-		SSLSocket socket = activeConnectionPool.get(ppa.id);
+		Socket socket = activeConnectionPool.get(ppa.id);
 		if (socket!=null && !socket.isConnected()) {
 			// We have a malfunctioning socket. Close it now and open a new one below
 			try {

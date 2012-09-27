@@ -24,6 +24,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
+import javax.net.SocketFactory;
+import javax.net.ServerSocketFactory;
+import java.net.ServerSocket;
+
 /**
  * The connection acceptor is a thread that runs on privacy peer hosts and constantly accepts incoming
  * connections. This class implements {@link Observable} and notifies its observers with new socket connections.
@@ -34,7 +38,7 @@ public class ConnectionAcceptor extends Observable implements Runnable {
 
 	private int listeningPort;
 	private SSLContext sslContext;
-	private SSLServerSocket serverSocket;
+	private ServerSocket serverSocket;
 	private boolean stopped = false;
 	
 	/**
@@ -52,10 +56,11 @@ public class ConnectionAcceptor extends Observable implements Runnable {
 	 */
 	public void run() {
 		try {
-			SSLServerSocketFactory socketFactory  = sslContext.getServerSocketFactory();
-			serverSocket = (SSLServerSocket)socketFactory.createServerSocket(listeningPort);
-			serverSocket.setEnabledCipherSuites(serverSocket.getSupportedCipherSuites());
-			serverSocket.setNeedClientAuth(true);
+			//SSLServerSocketFactory socketFactory  = sslContext.getServerSocketFactory();
+            ServerSocketFactory socketFactory = ServerSocketFactory.getDefault();
+            serverSocket = (ServerSocket)socketFactory.createServerSocket(listeningPort);
+			//serverSocket.setEnabledCipherSuites(serverSocket.getSupportedCipherSuites());
+			//serverSocket.setNeedClientAuth(true);
 
 		} catch (IOException e) {
 			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).severe("Could not open server socket. Details: "+e.getMessage());

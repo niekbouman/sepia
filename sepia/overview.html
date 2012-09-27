@@ -1,0 +1,28 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<body>
+<b>SEPIA</b> is a Java library providing tools for the privacy-preserving aggregation of multi-domain
+network data. SEPIA applies standard secure multiparty-computation (MPC) techniques to achieve
+that. In particular, Shamir’s secret sharing scheme is used to perform computations on private
+input data.
+
+</p>
+A typical deployment scenario for SEPIA involves a number of independent network
+domains observed by some type of network probe. This could, for instance, be NetFlow data
+export on a router, SNMP inventory data, or IDS alert logs. Although the individual network data
+is sensitive and therefore kept secret, network operators would like to aggregrate their data with
+the other networks. For example, they might be interested in whether other networks see similar
+intrusion alerts or not. Yet, they would never just hand over their alerts to another operator. But if
+they knew that indeed, the other guy is likely to be attacked by the same group of hackers, he might
+be willing to cooperate in order to come up with a more effective collaborative defense. So what
+these operators could do, is installing SEPIA <i>input peers</i> in their premises. These input peers take
+sensitive local data and share it over the group of SEPIA privacy peers. The <i>privacy peers</i> (PPs)
+together simulate a trusted third party (TTP). That is, each privacy peer gets only one share of each
+data item. From this share, the PP cannot derive any information about the original data. Only if a
+majority of PPs comes together and combines their shares, they can reconstruct the information.
+In addition, the PPs can perform any computation on the shared secrets without reconstructing
+intermediate values. When the computation has finished, the PPs reconstruct the final result (for
+instance all similar intrusion alerts reported by three or more networks) and distribute it to the input
+peers. These will then use this information for improving network management.
+</body>
+</html>
